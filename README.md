@@ -27,11 +27,13 @@ Usage examples
 Now board have it's one bootloader and starts blink green led.
 
 **Flash main application**
+
 Run `python flasher.py R COM5  ..\..\firmware\app\main.hex` 
 Replace COM5 to you serial interface, in linux use all path like \dev\ttyUSB1
 
 If it's all ok, at poweron green led starts blink for 2 seconts, then weakly glow - It't redy to work.
 
 **Known problems**
+
 Change boundrate and modbus id only from `l = ModBusBootLoader()` class
 `l.write_id_speed(2,10)` - set id to 2 and boundrate to 115200
