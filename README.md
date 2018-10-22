@@ -11,15 +11,15 @@ This instruments for support fortune controller.
 ## Flasher
 It's simple example of bootloader commands implementation in python class 
 Usage examples 
-python flasher.py R COM5  2.hex - read flash via COM5 and saves it to 2.hex
-python flasher.py W COM5 main.hex - write main.hex via COM5 to flash
+`python flasher.py R COM5  2.hex` - read flash via COM5 and saves it to `2.hex`
+`python flasher.py W COM5 main.hex` - write main.hex via COM5 to flash
 
 
-**Flash bootloadr(only onece)**
+**Flash bootloadr(only once)**
  1. Clone git
- 2. Find st-link or stm32 discovery board
- 3. Connect st-link 1 pin(not solder) NC, 2 - clock, 3- GND, 4-data
- 4. Install [utile](https://www.st.com/en/development-tools/stsw-link004.html)
+ 2. Find stlink or stm32 discovery board
+ 3. Connect stlink 1 pin(not solder) NC, 2 - clock, 3- GND, 4-data
+ 4. Install [Stlink utile](https://www.st.com/en/development-tools/stsw-link004.html)
  5. Erase all flash memory
  6. Open fortune-controls\firmware\bootloader\main.hex
  7. Flash it
@@ -27,12 +27,11 @@ python flasher.py W COM5 main.hex - write main.hex via COM5 to flash
 Now board have it's one bootloader and starts blink green led.
 
 **Flash main application**
-Run python flasher.py R COM5  ..\..\firmware\app\main.hex 
-Replace COM5 to you serial interface, in Linux use all path like \dev\ttyUSB1
+Run `python flasher.py R COM5  ..\..\firmware\app\main.hex` 
+Replace COM5 to you serial interface, in linux use all path like \dev\ttyUSB1
 
-If it's all OK, at power on green led starts blink for 2 seconds, then weakly glow - It't ready to work.
+If it's all ok, at poweron green led starts blink for 2 seconts, then weakly glow - It't redy to work.
 
 **Known problems**
-Change boundrate and modbus id only from ModBusBootLoader class
-l.write_id_speed(2,10) - set id to 2 and boundrate to 115200
-
+Change boundrate and modbus id only from `l = ModBusBootLoader()` class
+`l.write_id_speed(2,10)` - set id to 2 and boundrate to 115200
