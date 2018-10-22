@@ -1,5 +1,5 @@
 
-## 4tume controls 
+## 4tune controls 
 This instruments for support fortune controller.
 
  - /Lib contain all python libs you need to control our controller
