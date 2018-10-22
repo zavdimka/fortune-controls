@@ -1,1 +1,16 @@
-sfwrg
+## 4tume controls 
+This instruments for support fortune controller.
+
+ - /Lib contain all python libs you need to control our controller
+ - /Utilities/Flasher utile to flash new firmware via modbus
+ - /firmware/bootloader flash it via STlink ony first time
+ - /firmware/app flash it via Flaser
+
+
+## Flasher
+It's simple example of bootloader commands implementation in python class 
+Usage examples 
+python flasher.py R COM5  2.hex - read flash via COM5 and saves it to 2.hex
+python flasher.py W COM5 main.hex - write main.hex via COM5 to flash
+
+
