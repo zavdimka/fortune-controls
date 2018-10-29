@@ -18,7 +18,6 @@ class X4Motor():
 
         self.angle = 0
         self.speed = 0
-        super.__init__()
 
     @property
     def mode(self):
@@ -54,29 +53,29 @@ class X4Motor():
                                                      wordorder=Endian.Little)
         return decoder.decode_32bit_int()
 	
-	def readV(self):
-		result = self.client.read_holding_registers(64, 1, unit=self.id)
+    def readV(self):
+        result = self.client.read_holding_registers(64, 1, unit=self.id)
         decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
         return decoder.decode_16bit_int()
 		
-	def readI(self):
-		result = self.client.read_holding_registers(65, 1, unit=self.id)
+    def readI(self):
+        result = self.client.read_holding_registers(65, 1, unit=self.id)
         decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
         return decoder.decode_16bit_int()
 	
-	def readSpeed(self):
-		result = self.client.read_holding_registers(69, 1, unit=self.id)
+    def readSpeed(self):
+        result = self.client.read_holding_registers(69, 1, unit=self.id)
         decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
         return decoder.decode_16bit_int()
 	
-	def readError(self):
-		result = self.client.read_holding_registers(72, 1, unit=self.id)
+    def readError(self):
+        result = self.client.read_holding_registers(72, 1, unit=self.id)
         decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
@@ -102,14 +101,14 @@ class X4Motor():
     def setID(self, index):
         self.client.write_register(129, index, unit=self.id)
 		
-	def setIlimit(self, val):
-		self.client.write_register(10, val, unit=self.id)
+    def setIlimit(self, val):
+        self.client.write_register(10, val, unit=self.id)
 		
-	def setVlimit(self, val):
-		self.client.write_register(9, val, unit=self.id)
+    def setVlimit(self, val):
+        self.client.write_register(9, val, unit=self.id)
 		
-	def setTempShutDown(self, val):
-		self.client.write_register(11, val, unit=self.id)
+    def setTempShutDown(self, val):
+        self.client.write_register(11, val, unit=self.id)
 
     def save2flash(self):
         self.client.write_register(130, 0, unit=self.id)
@@ -149,7 +148,5 @@ class X4Motor():
         for i in d:
             builder.add_16bit_int(i)
         p= builder.build()
-        payload = b''
-        for i in p:
-            payload += i
-        self.client.write_register(30, payload, skip_encode=True, unit=self.id)
+        for i,j in zip(p,range(len(d))):
+            self.client.write_register(30+j, i, skip_encode=True, unit=self.id)
