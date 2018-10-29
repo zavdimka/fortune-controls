@@ -14,6 +14,8 @@ Usage examples
 `python flasher.py R COM5  2.hex` - read flash via COM5 and saves it to `2.hex`
 `python flasher.py W COM5 main.hex` - write main.hex via COM5 to flash
 
+![GitHub Logo](/swimpinout.png)
+Format: ![Alt Text](url)
 
 **Flash bootloadr(only once)**
  1. Clone git
