@@ -211,10 +211,10 @@ class ModBusBootLoader():
         f = IntelHex16bit(filename)
         minaddr = f.minaddr()
         skip = minaddr - startaddr
-        skip = (skip//self.mb_page_size)*self.mb_page_size
+        skip = (round(skip/self.mb_page_size))*self.mb_page_size
         last = f.maxaddr()
         last = last - startaddr
-        last = (last//self.mb_page_size)*self.mb_page_size
+        last = (round(last/self.mb_page_size))*self.mb_page_size
         s = last-skip
         d = []
         log.info(f"skip {skip}")
@@ -223,7 +223,7 @@ class ModBusBootLoader():
         log.info(f"write{s*2} Bytes")
         for i in range(s):
             d.append(f[startaddr+i+skip])
-        for i in range(s//self.mb_page_size):
+        for i in range(s//self.mb_page_size+1):
             self.erase_page(skip//self.mb_page_size+i)
-        return self.write_flash(skip//self.mb_page_size,d,check)
+        return self.write_flash(round(skip/self.mb_page_size),d,check)
 
