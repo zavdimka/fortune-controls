@@ -75,7 +75,7 @@ class X4Motor():
         return decoder.decode_16bit_int()
 	
     def readError(self):
-        result = self.client.read_holding_registers(72, 1, unit=self.id)
+        result = self.client.read_holding_registers(29, 1, unit=self.id)
         decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
@@ -126,6 +126,20 @@ class X4Motor():
         builder.add_16bit_int(i)
         payload = builder.to_registers()[0]
         self.client.write_register(17, payload, unit=self.id)
+        
+    def setAngle_PID_D_limit(self,i):
+        builder = BinaryPayloadBuilder(byteorder=Endian.Big,
+                                       wordorder=Endian.Little)
+        builder.add_16bit_int(i)
+        payload = builder.to_registers()[0]
+        self.client.write_register(19, payload, unit=self.id)
+       
+    def setSpeed_PID_D_limit(self,i):
+        builder = BinaryPayloadBuilder(byteorder=Endian.Big,
+                                       wordorder=Endian.Little)
+        builder.add_16bit_int(i)
+        payload = builder.to_registers()[0]
+        self.client.write_register(20, payload, unit=self.id)
 
     def setSpeed_PID_P(self,i):
         builder = BinaryPayloadBuilder(byteorder=Endian.Big,
@@ -140,6 +154,16 @@ class X4Motor():
         builder.add_16bit_int(i)
         payload = builder.to_registers()[0]
         self.client.write_register(14, payload, unit=self.id)
+        
+    def setPWM_Limit(self, i):
+        builder = BinaryPayloadBuilder(byteorder=Endian.Big,
+                                       wordorder=Endian.Little)
+        builder.add_16bit_int(i)
+        payload = builder.to_registers()[0]
+        self.client.write_register(21, payload, unit=self.id)
+        
+    def clear_error(self):
+        self.client.write_register(29, 0, unit=self.id)
 
     def loadsensorconfig(self, filename):
         d = np.load(filename)
