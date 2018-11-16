@@ -36,8 +36,7 @@ If it's all ok, at poweron green led starts blink for 2 seconts, then weakly glo
 
 **Known problems**
 
-Change boundrate and modbus id only from `l = ModBusBootLoader()` class
-`l.write_id_speed(2,10)` - set id to 2 and boundrate to 115200
+no?
 
 **Load sensor config**
 

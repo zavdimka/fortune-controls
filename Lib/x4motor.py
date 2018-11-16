@@ -58,14 +58,14 @@ class X4Motor():
         decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
-        return decoder.decode_16bit_int()
+        return decoder.decode_16bit_int() / 10000
 		
     def readI(self):
         result = self.client.read_holding_registers(65, 1, unit=self.id)
         decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
-        return decoder.decode_16bit_int()
+        return decoder.decode_16bit_int() / 1000
 	
     def readSpeed(self):
         result = self.client.read_holding_registers(69, 1, unit=self.id)

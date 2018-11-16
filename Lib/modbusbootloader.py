@@ -164,7 +164,11 @@ class ModBusBootLoader():
                 log.debug(f'write page {page + i//self.mb_page_size}')
                 self.set_current_page(page + i//self.mb_page_size)
                 self.set_current_offset(i % self.mb_page_size)
-                err = self.write_small_buff(buff[i:i+self.mb_transfer_size])
+                err = False
+                try:
+                    err = self.write_small_buff(buff[i:i+self.mb_transfer_size])
+                except AttributeError:
+                    err = False
                 if check:
                     d = self.read_data_buff_crc()
                     f = [i for i,k in zip(d, buff[i:i+self.mb_transfer_size]) if i!=k]
