@@ -18,29 +18,46 @@ class X4Motor():
 
         self.angle = 0
         self.speed = 0
+        self.pwm = 0
+        self.targetAngle = 0
+        self.setPWM_Limit(500)  # 200 ~2.7A,  400 ~12A,  450 ~16A
+        self.clear_error()
 
+        
     @property
     def mode(self):
         return self._mode
 
+        
     @mode.setter
     def mode(self, value):
         self._mode = value
         self.updateMode()
 
+        
     def setMode(self, mode):
         self.mode = mode
 
-    def setAngle(self, angle):
+        
+    def setAngle(self, angle): # Set up aim to angle and set up angle
         if self.mode != self.MODE_ANGLE:
             self.mode = self.MODE_ANGLE
         self.angle = int(angle)
         self.updateData()
 
-    def setSpeed(self, speed):
+        
+    def setSpeed(self, speed): # Set up aim to speed and set up speed
         if self.mode != self.MODE_SPEED:
             self.mode = self.MODE_SPEED
         self.speed = int(speed)
+        self.updateData()
+        
+        
+    def setPWM(self, pwm): # Set up aim to pwm and set up pwm
+        if self.mode != self.MODE_PWM:
+            self.mode = self.MODE_NONE
+            self.mode = self.MODE_PWM
+        self.pwm = int(pwm)
         self.updateData()
 
     def release(self):
@@ -91,28 +108,42 @@ class X4Motor():
             builder.add_16bit_int(self.angle)
             payload = builder.to_registers()
             self.client.write_register(4, payload[0], unit=self.id)
+            
         elif self.mode == self.MODE_SPEED:
             builder = BinaryPayloadBuilder(byteorder=Endian.Big,
                                            wordorder=Endian.Little)
             builder.add_16bit_int(self.speed)
             payload = builder.to_registers()[0]
             self.client.write_register(3, payload, unit=self.id)
+            
+        elif self.mode == self.MODE_PWM:
+            builder = BinaryPayloadBuilder(byteorder=Endian.Big,
+                                           wordorder=Endian.Little)
+            builder.add_16bit_int(self.pwm)
+            payload = builder.to_registers()[0]
+            self.client.write_register(2, payload, unit=self.id)
 
     def setID(self, index):
         self.client.write_register(129, index, unit=self.id)
-		
+        self.id = index
+
+        
     def setIlimit(self, val):
         self.client.write_register(10, val, unit=self.id)
-		
+
+        
     def setVlimit(self, val):
         self.client.write_register(9, val, unit=self.id)
-		
+
+        
     def setTempShutDown(self, val):
         self.client.write_register(11, val, unit=self.id)
 
+        
     def save2flash(self):
         self.client.write_register(130, 0, unit=self.id)
 
+        
     def setAngle_PID_P(self,i):
         builder = BinaryPayloadBuilder(byteorder=Endian.Big,
                                        wordorder=Endian.Little)
@@ -120,27 +151,31 @@ class X4Motor():
         payload = builder.to_registers()[0]
         self.client.write_register(16, payload, unit=self.id)
 
-    def setAngle_PID_D(self,i):
+        
+    def setAngle_PID_I(self,i):
         builder = BinaryPayloadBuilder(byteorder=Endian.Big,
                                        wordorder=Endian.Little)
         builder.add_16bit_int(i)
         payload = builder.to_registers()[0]
         self.client.write_register(17, payload, unit=self.id)
         
-    def setAngle_PID_D_limit(self,i):
+        
+    def setAngle_PID_I_limit(self,i):
         builder = BinaryPayloadBuilder(byteorder=Endian.Big,
                                        wordorder=Endian.Little)
         builder.add_16bit_int(i)
         payload = builder.to_registers()[0]
         self.client.write_register(19, payload, unit=self.id)
        
-    def setSpeed_PID_D_limit(self,i):
+       
+    def setSpeed_PID_I_limit(self,i):
         builder = BinaryPayloadBuilder(byteorder=Endian.Big,
                                        wordorder=Endian.Little)
         builder.add_16bit_int(i)
         payload = builder.to_registers()[0]
         self.client.write_register(20, payload, unit=self.id)
 
+        
     def setSpeed_PID_P(self,i):
         builder = BinaryPayloadBuilder(byteorder=Endian.Big,
                                        wordorder=Endian.Little)
@@ -148,12 +183,14 @@ class X4Motor():
         payload = builder.to_registers()[0]
         self.client.write_register(13, payload, unit=self.id)
 
-    def setSpeed_PID_D(self,i):
+        
+    def setSpeed_PID_I(self,i):
         builder = BinaryPayloadBuilder(byteorder=Endian.Big,
                                        wordorder=Endian.Little)
         builder.add_16bit_int(i)
         payload = builder.to_registers()[0]
         self.client.write_register(14, payload, unit=self.id)
+        
         
     def setPWM_Limit(self, i):
         builder = BinaryPayloadBuilder(byteorder=Endian.Big,
@@ -162,9 +199,19 @@ class X4Motor():
         payload = builder.to_registers()[0]
         self.client.write_register(21, payload, unit=self.id)
         
+        
+    def setAngle_PWM_limit(self, i): #PWM increase limit in angle control loop
+        builder = BinaryPayloadBuilder(byteorder=Endian.Big,
+                                       wordorder=Endian.Little)
+        builder.add_16bit_int(i)
+        payload = builder.to_registers()[0]
+        self.client.write_register(22, payload, unit=self.id)
+        
+        
     def clear_error(self):
         self.client.write_register(29, 0, unit=self.id)
 
+        
     def loadsensorconfig(self, filename):
         d = np.load(filename)
         builder = BinaryPayloadBuilder(byteorder=Endian.Big,
