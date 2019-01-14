@@ -19,6 +19,10 @@ M.setAngle_PID_I(1) # PID I part
 M.setAngle_PID_I_limit(1000) # PID I integratons limits
 M.setAngle_PWM_limit(10)
 
+M.setIlimit(30000)
+M.setVlimit(10000)
+M.setTempShutDown(100)
+
 print("Angle read Demo")
 for i in range(100):
     angle = M.readAngle()
