@@ -8,9 +8,6 @@ import time
 
 import logging
 
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
-
 class ModBusBootLoader():
     MB_ID_REG = 245 #for bootloader version chec
     MB_ID_REG_CURVAL = 1 # bootloader version
@@ -66,20 +63,20 @@ class ModBusBootLoader():
         self.mb_page_start     = self.mb_read_int16(self.MB_PAGE_START)
 
     def print_info(self):
-        log.info(f"mb id            is {self.mb_id}")
-        log.info(f"mb state         is {self.mb_state}")
-        log.info(f"mb transfer size is {self.mb_transfer_size}")
-        log.info(f"mb page size     is {self.mb_page_size}")
-        log.info(f"mb page count    is {self.mb_page_count}")
-        log.info(f"mb page start    is {self.mb_page_start}")
+        logging.info(f"mb id            is {self.mb_id}")
+        logging.info(f"mb state         is {self.mb_state}")
+        logging.info(f"mb transfer size is {self.mb_transfer_size}")
+        logging.info(f"mb page size     is {self.mb_page_size}")
+        logging.info(f"mb page count    is {self.mb_page_count}")
+        logging.info(f"mb page start    is {self.mb_page_start}")
 
     def set_current_page(self, page):
         self.client.write_register(self.MP_SELECTED_PAGE , page, unit=self.id)
-      #  log.info(f"set page   to {page:#0x}")
+      #  logging.info(f"set page   to {page:#0x}")
 
     def set_current_offset(self, offset):
         self.client.write_register(self.MP_PAGE_OFFSET, offset, unit=self.id)
-      #  log.info(f"set offset to {offset:#0x}")
+      #  logging.info(f"set offset to {offset:#0x}")
 
     def read_data_buff(self):
         if self.mb_transfer_size > 0:
@@ -110,10 +107,12 @@ class ModBusBootLoader():
     def erase_page(self, page):
         self.set_current_page(page)
         self.client.write_register(self.MB_ACTION_REG, self.MB_ACTION_ERASE, unit=self.id)
-        log.info(f'Erasing page {page}')
+        logging.info(f'Erasing page {page}')
 
     def update_state(self):
         self.mb_state = self.mb_read_int16(self.MB_STATE_REG)
+        if self.mb_state > 0:
+            logging.warning(f'state is {self.mb_state}')
         return self.mb_state
 
     def reset_state(self):
@@ -131,6 +130,7 @@ class ModBusBootLoader():
             [builder.add_16bit_uint(i) for i in buff]
             builder.add_16bit_uint(self.calc_crc(buff))
             payload = builder.build()
+            #print(payload)
             self.client.write_registers(self.MB_START_STREAM, payload, skip_encode=True, unit=self.id)
             if self.update_state() == 0: #check errors
                 self.client.write_register(self.MB_ACTION_REG, self.MB_ACTION_WRITE, unit=self.id)
@@ -151,7 +151,7 @@ class ModBusBootLoader():
         self.set_current_page(7)
         self.write_small_buff(data)
         if self.update_state()>0:
-            log.error(f'Error write id and speed {self.mb_state}')
+            logging.error(f'Error write id and speed {self.mb_state}')
 
 
     def write_flash(self,page, buff,check=True):
@@ -161,22 +161,27 @@ class ModBusBootLoader():
             err= True
             repeat = 0
             while i<len(buff) and err and repeat < self.wr_repeat:
-                log.debug(f'write page {page + i//self.mb_page_size}')
-                self.set_current_page(page + i//self.mb_page_size)
-                self.set_current_offset(i % self.mb_page_size)
+                logging.debug(f'write page {page + i//self.mb_page_size}')
+                cpage = page + i//self.mb_page_size
+                coffset = i % self.mb_page_size
+                self.set_current_page(cpage)
+                self.set_current_offset(coffset)
+                logging.info(f'set page and offset to {cpage} : {coffset}')
                 err = False
                 try:
                     err = self.write_small_buff(buff[i:i+self.mb_transfer_size])
                 except AttributeError:
                     err = False
+                if not err:
+                    logging.warning(f'Error write buff')
                 if check:
                     d = self.read_data_buff_crc()
                     f = [i for i,k in zip(d, buff[i:i+self.mb_transfer_size]) if i!=k]
                     if len(f)>0 or not err:
                         err = False
                         repeat += 1
-                        log.error(f"page {page + i//self.mb_page_size} offset {i % self.mb_page_size} ")
-                        log.error("Write check error, try again")
+                        logging.error(f"page {page + i//self.mb_page_size} offset {i % self.mb_page_size} ")
+                        logging.error("Write check error, try again")
                     else:
                         repeat = 0
                 if repeat == 0:
@@ -215,19 +220,22 @@ class ModBusBootLoader():
         f = IntelHex16bit(filename)
         minaddr = f.minaddr()
         skip = minaddr - startaddr
-        skip = (round(skip/self.mb_page_size))*self.mb_page_size
+        skip = (skip//self.mb_page_size)*self.mb_page_size
         last = f.maxaddr()
         last = last - startaddr
-        last = (round(last/self.mb_page_size))*self.mb_page_size
+        last = (last//self.mb_page_size + 1)*self.mb_page_size
+        spage = skip // self.mb_page_size
         s = last-skip
         d = []
-        log.info(f"skip {skip}")
-        log.info(f"last {last}")
-        log.info(f"s    {s}")
-        log.info(f"write{s*2} Bytes")
+        logging.info(f"skip  {skip}")
+        logging.info(f"last  {last}")
+        logging.info(f"s     {s}")
+        logging.info(f"write {s*2} Bytes")
+        logging.info(f"spage {spage}")
         for i in range(s):
             d.append(f[startaddr+i+skip])
         for i in range(s//self.mb_page_size+1):
             self.erase_page(skip//self.mb_page_size+i)
-        return self.write_flash(round(skip/self.mb_page_size),d,check)
+        #print(d)
+        return self.write_flash(spage,d,check)
 
