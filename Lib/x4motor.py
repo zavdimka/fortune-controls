@@ -62,6 +62,9 @@ class X4Motor():
 
     def release(self):
         self.mode = self.MODE_NONE
+        
+    def setTimeout(self,value):
+        self.client.write_register(18, int(value), unit=self.id)
 
     def readAngle(self):
         result = self.client.read_holding_registers(67, 2, unit=self.id)
