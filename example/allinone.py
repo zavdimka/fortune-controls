@@ -6,7 +6,7 @@ from x4motor import X4Motor
 from modbusbootloader import ModBusBootLoader
 import time
 
-client= ModbusClient(method = "rtu", port="COM7", stopbits = 1,
+client= ModbusClient(method = "rtu", port="COM4", stopbits = 1,
                      bytesize = 8, parity = 'N', baudrate= 115200,
                      timeout = 0.8 )
 
@@ -22,6 +22,7 @@ M.setAngle_PWM_limit(10)
 M.setIlimit(30000)
 M.setVlimit(10000)
 M.setTempShutDown(100)
+M.setPWM_Limit(100)
 
 print("Angle read Demo")
 for i in range(100):
@@ -61,7 +62,7 @@ M.setPWM_Limit(500)
 
 points = [200,300,500,0,-300,-400,-500,-250]
 for i in points:
-    print("Set Speed to",i)
+    print("Set PWM to",i)
     M.setPWM(i)
     time.sleep(1)
     
