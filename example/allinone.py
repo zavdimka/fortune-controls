@@ -3,10 +3,9 @@ sys.path.append('..\Lib')
 
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient #initialize a serial RTU client instance
 from x4motor import X4Motor
-from modbusbootloader import ModBusBootLoader
 import time
 
-client= ModbusClient(method = "rtu", port="COM4", stopbits = 1,
+client= ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
                      bytesize = 8, parity = 'N', baudrate= 115200,
                      timeout = 0.8 )
 

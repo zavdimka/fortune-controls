@@ -2,7 +2,6 @@ from pymodbus.payload import BinaryPayloadDecoder
 from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.constants import Endian
 from collections import OrderedDict
-import numpy as np
 
 class X4Motor():
     MODE_ANGLE = 1
@@ -11,7 +10,7 @@ class X4Motor():
     MODE_NONE = 0
 
     def __init__(self, client, id, mode = MODE_NONE):
-        self._mode = self.MODE_NONE
+        self.mode = self.MODE_NONE
         self.client = client
         self.id = id
         self.mode = mode
@@ -22,26 +21,16 @@ class X4Motor():
         self.targetAngle = 0
         self.setPWM_Limit(500)  # 200 ~2.7A,  400 ~12A,  450 ~16A
         self.clear_error()
-
-        
-    @property
-    def mode(self):
-        return self._mode
-
-        
-    @mode.setter
-    def mode(self, value):
-        self._mode = value
-        self.updateMode()
-
         
     def setMode(self, mode):
         self.mode = mode
+        self.updateMode()
 
         
     def setAngle(self, angle): # Set up aim to angle and set up angle
         if self.mode != self.MODE_ANGLE:
             self.mode = self.MODE_ANGLE
+            self.updateMode()
 
         builder = BinaryPayloadBuilder(byteorder=Endian.Big,
                                        wordorder=Endian.Little)
@@ -53,6 +42,8 @@ class X4Motor():
     def setSpeed(self, speed): # Set up aim to speed and set up speed
         if self.mode != self.MODE_SPEED:
             self.mode = self.MODE_SPEED
+            self.updateMode()
+            
         self.speed = int(speed)
         self.updateData()
         
@@ -61,11 +52,14 @@ class X4Motor():
         if self.mode != self.MODE_PWM:
             self.mode = self.MODE_NONE
             self.mode = self.MODE_PWM
+            self.updateMode()
+            
         self.pwm = int(pwm)
         self.updateData()
 
     def release(self):
         self.mode = self.MODE_NONE
+        self.updateMode()
         
     def setTimeout(self,value):
         self.client.write_register(18, int(value/40), unit=self.id)
