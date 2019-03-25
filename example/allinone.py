@@ -51,6 +51,9 @@ points = [1,2,4,8,10,0,-10,-10]
 for i in points:
     print("Set Speed to",i)
     M.setSpeed(i)
+    e = M.readError()
+    if e>0:
+        print("Error is", e)
     time.sleep(1)
 
 M.release()
@@ -63,6 +66,9 @@ points = [200,300,500,0,-300,-400,-500,-250]
 for i in points:
     print("Set PWM to",i)
     M.setPWM(i)
+    e = M.readError()
+    if e>0:
+        print("Error is", e)
     time.sleep(1)
     
 M.release()
