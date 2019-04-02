@@ -116,6 +116,22 @@ class X4Motor():
             self.step = self.step
         self.updateMode()
         
+    @property
+    def speed(self):
+        return 0
+        
+    @speed.setter:
+    def speed(self, value):
+        self.setSpeed(value)
+        
+    @property
+    def pwm(self):
+        return 0
+        
+    @pwm.setter:
+    def pwm(self, value):
+        self.setPWM(value)
+        
         
     @property    
     def error(self):

@@ -1,5 +1,7 @@
 import sys
 sys.path.append('..\Lib')
+sys.path.append('../Lib')
+
 
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient #initialize a serial RTU client instance
 from x4motor import X4Motor
@@ -20,7 +22,7 @@ M = X4Motor(client, settings = config)
 
 print("Angle read Demo")
 for i in range(100):
-    angle = M.readAngle()
+    angle = M.step
     print("Angle is", angle)
     time.sleep(0.1)
     
@@ -30,7 +32,7 @@ points = [50,100,200,300,400 ,1000,0,-1000] #[-320, 0, 320, 0, -320/3, -320*2/3,
 
 for i in points:
     print("Set Angle to", i)
-    M.setAngle(angle+i)
+    M.step = angle+i
     time.sleep(2)
 
 time.sleep(1)
@@ -41,7 +43,7 @@ print("Speed Demo")
 points = [1,2,4,8,10,0,-10,-10]
 for i in points:
     print("Set Speed to",i)
-    M.setSpeed(i)
+    M.speed = i
     e = M.readError()
     if e>0:
         print("Error is", e)
@@ -51,12 +53,11 @@ M.release()
 
 print("PWM Demo")
 
-M.setPWM_Limit(500)
 
 points = [200,300,500,0,-300,-400,-500,-250]
 for i in points:
     print("Set PWM to",i)
-    M.setPWM(i)
+    M.pwm = i
     e = M.readError()
     if e>0:
         print("Error is", e)
