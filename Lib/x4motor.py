@@ -36,6 +36,8 @@ class X4Motor():
                 self.setIlimit(settings.get('I_limit', 5000))
             if 'V_min' in settings:
                 self.setVlimit(settings.get('V_min', 11))
+            if 'TempShutDown' in settings:
+                self.setTempShutDown(settings.get('TempShutDown', 90))
         else:
             self.id = id
             self.mode = mode

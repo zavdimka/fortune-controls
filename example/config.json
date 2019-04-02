@@ -1,0 +1,14 @@
+{
+      "id": 1,
+      "Mode": "Angle",
+      "PWM_Limit" : 200, //increase if its to slow
+      "PWM_inc_limit" : 2, //increase if its reacts to slow
+      "I_limit": 5.0, 
+      "V_min": 12.0, 
+      "Angle_PID_P" : 100,
+      "Angle_PID_I" : 1,
+      "StepsPerMM": 71.06,
+      "TimeOut" : 1000,
+      "TempShutDown" : 75,
+      "Reverse": 0
+    }
