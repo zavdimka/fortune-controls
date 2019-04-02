@@ -8,7 +8,7 @@
       "Angle_PID_P" : 100,
       "Angle_PID_I" : 1,
       "StepsPerMM": 71.06,
-      "TimeOut" : 1000,
+      "TimeOut" : 0,
       "TempShutDown" : 75,
       "Reverse": 0
     }
