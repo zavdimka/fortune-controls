@@ -32,10 +32,10 @@ config_log()
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("action",choices=['r', 'w', 'e', 'i'], type=str.lower, help = "port to connect")
 parser.add_argument("port", type=str, default='COM1', help = "port to connect")
-parser.add_argument("file", type=str, default='1.hex', help = "file to deal with")
-parser.add_argument("-s", "--baund", type=int, default=115200, help = "port speed")
+parser.add_argument("action",choices=['r', 'w', 'e', 'i'], type=str.lower, help = "port to connect")
+parser.add_argument("-f", "--file", type=str, default='1.hex', help = "file to deal with")
+parser.add_argument("-b", "--baund", type=int, default=115200, help = "port speed")
 parser.add_argument("-a", "--addr", type=int, default=1, help = "modbus addres")
 parser.add_argument("-t", "--timeout", type=float, default=0.8, help = "modbus timeout")
 parser.add_argument("-i", "--newid", type=int, default=1, help = "modbus new id")
@@ -61,8 +61,7 @@ if args.action == 'r':
     r = l.read_flash_file(8,16*512, args.file) #16 pages of 1024 bytes
     logging.info(f"save to {args.file} {r[1]*2} Bytes in {time.time()-t:.2f} speed {r[1]*2/(time.time()-t):.1f} Bytes/sec")
     l.run_app()
-
-if args.action == 'w':
+elif args.action == 'w':
     l.get_target_info()
     l.print_info()
     t = time.time()
@@ -70,8 +69,7 @@ if args.action == 'w':
     r = l.write_flash_file(args.file)
     logging.info(f"write from{args.file} {r[1]*2} Bytes in {time.time()-t:.2f} speed {r[1]*2/(time.time()-t):.1f} Bytes/sec")
     l.run_app()
-
-if args.action == 'i':
+elif args.action == 'i':
     l.get_target_info()
     l.print_info()
     t = time.time()
@@ -79,5 +77,7 @@ if args.action == 'i':
     l.write_id_speed(args.newid, 10)
     logging.info(f"set in {time.time()-t:.2f}")
     l.run_app()
-
+ else:
+    logging.error("No action selected")
+    
 client.close()

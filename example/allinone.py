@@ -4,6 +4,7 @@ sys.path.append('..\Lib')
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient #initialize a serial RTU client instance
 from x4motor import X4Motor
 import time
+import hjson
 
 client= ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
                      bytesize = 8, parity = 'N', baudrate= 115200,
@@ -11,17 +12,11 @@ client= ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
 
 client.connect()
 
-M = X4Motor(client, 1)
+f = open('config.json')
+config = hjson.loads(f.read())
+f.close()
 
-M.setAngle_PID_P(100) #PID P part
-M.setAngle_PID_I(1) # PID I part
-M.setAngle_PID_I_limit(1000) # PID I integratons limits
-M.setAngle_PWM_limit(10)
-
-M.setIlimit(30000)
-M.setVlimit(10000)
-M.setTempShutDown(100)
-M.setPWM_Limit(100)
+M = X4Motor(client, settings = config)
 
 print("Angle read Demo")
 for i in range(100):
@@ -41,10 +36,6 @@ for i in points:
 time.sleep(1)
 M.release()
 time.sleep(0.5)
-
-M.setSpeed_PID_P(100) #PID P part
-M.setSpeed_PID_I(100) # PID I part
-M.setSpeed_PID_I_limit(1000) # PID I integratons limits
 
 print("Speed Demo")
 points = [1,2,4,8,10,0,-10,-10]

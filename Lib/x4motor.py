@@ -1,7 +1,8 @@
 from pymodbus.payload import BinaryPayloadDecoder
 from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.constants import Endian
-from collections import OrderedDict
+import numpy as np
+import logging
 
 class X4Motor():
     MODE_ANGLE = 1
@@ -9,28 +10,123 @@ class X4Motor():
     MODE_PWM = 3
     MODE_NONE = 0
 
-    def __init__(self, client, id, mode = MODE_NONE):
-        self.mode = self.MODE_NONE
+    def __init__(self, client, settings = None, id = 1, mode = MODE_NONE):
+        self._mode = self.MODE_NONE
         self.client = client
-        self.id = id
-        self.mode = mode
-
+        self.stepspermm = 1
+        if settings:
+            self.id = settings.get('id',1)
+            if 'StepsPerMM' in settings:
+                self.stepspermm = settings.get('StepsPerMM', 1)
+            if 'Reverse' in settings:
+                self.reverse = settings.get('Reverse', 0)
+            if 'PWM_Limit' in settings:
+                self.setPWM_Limit(settings.get('PWM_Limit', 300))
+            if 'PWM_inc_limit' in settings:
+                self.setAngle_PWM_limit(settings.get('PWM_inc_limit', 1))
+            if 'Mode' in settings:
+                self.mode = self.str2mode(settings.get('Mode', 'none'))
+            if 'TimeOut' in settings:
+                self.setTimeout(settings.get('TimeOut', 1))
+            if 'Angle_PID_P' in settings:
+                self.setAngle_PID_P(settings.get('Angle_PID_P', 1))
+            if 'Angle_PID_I' in settings:
+                self.setAngle_PID_I(settings.get('Angle_PID_I', 1))
+            if 'I_limit' in settings:
+                self.setIlimit(settings.get('I_limit', 5000))
+            if 'V_min' in settings:
+                self.setVlimit(settings.get('V_min', 11))
+        else:
+            self.id = id
+            self.mode = mode
+        
         self.angle = 0
+        print(f'id  {self.id}')
+        self.angle = self.readAngle()  #for sensor
+        self.sangle = self.angle # for set up
         self.speed = 0
         self.pwm = 0
         self.targetAngle = 0
-        self.setPWM_Limit(500)  # 200 ~2.7A,  400 ~12A,  450 ~16A
+        #self.setPWM_Limit(500)  # 200 ~2.7A,  400 ~12A,  450 ~16A
         self.clear_error()
+
+
+    def str2mode(self, str):
+        str = str.lower()
+        if str == 'Angle'.lower():
+            return self.MODE_ANGLE
+        if str == 'Speed'.lower():
+            return self.MODE_SPEED
+        if str == 'PWM'.lower():
+            return self.MODE_PWM
+        return self.MODE_NONE
+
+    @property
+    def dstep(self):
+        a = self.readAngle()
+        d = a - self.angle
+        self.angle = a
+        i = d / self.stepspermm
+        if self.reverse:
+            i = -i
+        return i
+
+
+    @dstep.setter
+    def dstep(self, value):
+        if self.reverse:
+            value = -value
+        d = value * self.stepspermm
+        a = d + self.sangle
+        #print(f'was {self.sangle:.1f}, setting {d:.1f}, diff {a:.1f}')
+        self.sangle = a
+        self.setAngle(int(a))
+
+
+    @property
+    def step(self):
+        a = self.readAngle()
+        self.angle = a
+        i = a / self.stepspermm
+        if self.reverse:
+            i = -i
+        return i
+
+
+    @step.setter
+    def step(self, value):
+        if self.reverse:
+            value = -value
+        d = value * self.stepspermm
+        self.sangle = d
+        self.setAngle(int(d))
+
+
+    @property
+    def mode(self):
+        return self._mode
+
+        
+    @mode.setter
+    def mode(self, value):
+        self._mode = value
+        if value == self.MODE_ANGLE:
+            self.step = self.step
+        self.updateMode()
+        
+        
+    @property    
+    def error(self):
+        return self.readError()
+
         
     def setMode(self, mode):
         self.mode = mode
-        self.updateMode()
 
         
     def setAngle(self, angle): # Set up aim to angle and set up angle
         if self.mode != self.MODE_ANGLE:
             self.mode = self.MODE_ANGLE
-            self.updateMode()
 
         builder = BinaryPayloadBuilder(byteorder=Endian.Big,
                                        wordorder=Endian.Little)
@@ -42,8 +138,6 @@ class X4Motor():
     def setSpeed(self, speed): # Set up aim to speed and set up speed
         if self.mode != self.MODE_SPEED:
             self.mode = self.MODE_SPEED
-            self.updateMode()
-            
         self.speed = int(speed)
         self.updateData()
         
@@ -52,34 +146,40 @@ class X4Motor():
         if self.mode != self.MODE_PWM:
             self.mode = self.MODE_NONE
             self.mode = self.MODE_PWM
-            self.updateMode()
-            
         self.pwm = int(pwm)
         self.updateData()
 
     def release(self):
         self.mode = self.MODE_NONE
-        self.updateMode()
-        
-    def setTimeout(self,value):
-        self.client.write_register(18, int(value/40), unit=self.id)
+
+    def saferead(self, addr, count, unit, retry = 3 ):
+        while retry > 0:
+            result = self.client.read_holding_registers(addr, count, unit=unit)
+            if hasattr(result, 'registers'):
+                return (result, True)
+            retry -= 1
+        logging.info(f'addr {addr}, unit {unit}')
+        return (None, False)
 
     def readAngle(self):
-        result = self.client.read_holding_registers(67, 2, unit=self.id)
+        result,success = self.saferead(67, 2, unit=self.id)
         decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
         return decoder.decode_32bit_int()
+
+    def setTimeout(self,value):
+        self.client.write_register(18, int(value/40), unit=self.id)
 	
     def readV(self):
-        result = self.client.read_holding_registers(64, 1, unit=self.id)
+        result,success  = self.saferead(64, 1, unit=self.id)
         decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
         return decoder.decode_16bit_int() / 10000
 		
     def readI(self):
-        result = self.client.read_holding_registers(65, 1, unit=self.id)
+        result,success  = self.saferead(65, 1, unit=self.id)
         decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
@@ -104,7 +204,12 @@ class X4Motor():
 
     def updateData(self):
         if self.mode == self.MODE_ANGLE:
-            pass            
+            builder = BinaryPayloadBuilder(byteorder=Endian.Big,
+                                           wordorder=Endian.Little)
+            builder.add_16bit_int(self.angle)
+            payload = builder.to_registers()
+            self.client.write_register(4, payload[0], unit=self.id)
+            
         elif self.mode == self.MODE_SPEED:
             builder = BinaryPayloadBuilder(byteorder=Endian.Big,
                                            wordorder=Endian.Little)
@@ -125,11 +230,13 @@ class X4Motor():
 
         
     def setIlimit(self, val):
-        self.client.write_register(10, val, unit=self.id)
+        i = val * 1000
+        self.client.write_register(10, int(i), unit=self.id)
 
         
     def setVlimit(self, val):
-        self.client.write_register(9, val, unit=self.id)
+        i = val * 1000
+        self.client.write_register(9, int(i), unit=self.id)
 
         
     def setTempShutDown(self, val):
