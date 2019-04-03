@@ -64,7 +64,7 @@ for i in points:
     e = M.readError()
     if e>0:
         print("Error is", e)
-    time.sleep(1)
+    time.sleep(0.5)
     
 M.release()
 

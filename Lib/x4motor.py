@@ -32,6 +32,10 @@ class X4Motor():
                 self.setAngle_PID_P(settings.get('Angle_PID_P', 1))
             if 'Angle_PID_I' in settings:
                 self.setAngle_PID_I(settings.get('Angle_PID_I', 1))
+            if 'Speed_PID_P' in settings:
+                self.setSpeed_PID_P(settings.get('Speed_PID_P', 1))
+            if 'Speed_PID_I' in settings:
+                self.setSpeed_PID_I(settings.get('Speed_PID_I', 1))
             if 'I_limit' in settings:
                 self.setIlimit(settings.get('I_limit', 5000))
             if 'V_min' in settings:
