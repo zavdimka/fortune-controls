@@ -43,7 +43,7 @@ class X4Motor():
             self.mode = mode
         
         self.angle = 0
-        print(f'id  {self.id}')
+        print('id' + str(self.id))
         self.angle = self.readAngle()  #for sensor
         self.sangle = self.angle # for set up
         self.speed = 0
@@ -118,18 +118,28 @@ class X4Motor():
         
     @property
     def speed(self):
-        return 0
+        s = self.readSpeed()
+        i = a / self.stepspermm
+        if self.reverse:
+            i = -i
+        return i
         
     @speed.setter
     def speed(self, value):
+        if self.reverse:
+            value = -value
+        d = value * self.stepspermm
         self.setSpeed(value)
         
     @property
     def pwm(self):
-        return 0
+        return self.readPWM()
+        
         
     @pwm.setter
     def pwm(self, value):
+        if self.reverse:
+            value = -value
         self.setPWM(value)
         
         
@@ -211,6 +221,13 @@ class X4Motor():
 	
     def readSpeed(self):
         result = self.client.read_holding_registers(69, 1, unit=self.id)
+        decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
+                                                     byteorder=Endian.Big,
+                                                     wordorder=Endian.Little)
+        return decoder.decode_16bit_int()
+        
+    def readPWM(self):
+        result = self.client.read_holding_registers(71, 1, unit=self.id)
         decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)

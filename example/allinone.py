@@ -32,7 +32,10 @@ points = [50,100,200,300,400 ,1000,0,-1000] #[-320, 0, 320, 0, -320/3, -320*2/3,
 
 for i in points:
     print("Set Angle to", i)
-    M.step = angle+i
+    M.step = (angle+i)/10
+    e = M.readError()
+    if e>0:
+        print("Error is", e)
     time.sleep(2)
 
 time.sleep(1)
@@ -43,7 +46,7 @@ print("Speed Demo")
 points = [1,2,4,8,10,0,-10,-10]
 for i in points:
     print("Set Speed to",i)
-    M.speed = i
+    M.speed = i/10
     e = M.readError()
     if e>0:
         print("Error is", e)
@@ -54,10 +57,10 @@ M.release()
 print("PWM Demo")
 
 
-points = [200,300,500,0,-300,-400,-500,-250]
+points = list(range(1,100,10)) + list(range(100,-101,-10)) + list(range(-100,1,10))
 for i in points:
     print("Set PWM to",i)
-    M.pwm = i
+    M.pwm = i*3
     e = M.readError()
     if e>0:
         print("Error is", e)
