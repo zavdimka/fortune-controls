@@ -4,7 +4,7 @@ from pymodbus.constants import Endian
 import numpy as np
 import logging
 
-class X4Motor():
+class X4Motor(object):
     MODE_ANGLE = 1
     MODE_SPEED = 2
     MODE_PWM = 3
@@ -202,7 +202,7 @@ class X4Motor():
             if hasattr(result, 'registers'):
                 return (result, True)
             retry -= 1
-        logging.info(f'addr {addr}, unit {unit}')
+        #logging.info(f'addr {addr}, unit {unit}')
         return (None, False)
 
     def readAngle(self):
