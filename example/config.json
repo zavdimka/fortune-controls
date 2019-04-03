@@ -4,7 +4,7 @@
       "PWM_Limit" : 300, //increase if its to slow
       "PWM_inc_limit" : 2, //increase if its reacts to slow
       "I_limit": 5.0, 
-      "V_min": 25.0, 
+      "V_min": 12.0, 
       "Angle_PID_P" : 100,
       "Angle_PID_I" : 1,
       "Speed_PID_P" : 100,
