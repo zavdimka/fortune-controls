@@ -16,18 +16,29 @@ class X4Motor():
         self.stepspermm = 1
         if settings:
             self.id = settings.get('id',1)
+            if 'I_limit' in settings:
+                self.setIlimit(settings.get('I_limit', 5000))
+            if 'V_min' in settings:
+                self.setVlimit(settings.get('V_min', 11))
+            if 'TempShutDown' in settings:
+                self.setTempShutDown(settings.get('TempShutDown', 90))
+            
             if 'StepsPerMM' in settings:
                 self.stepspermm = settings.get('StepsPerMM', 1)
             if 'Reverse' in settings:
                 self.reverse = settings.get('Reverse', 0)
+                
             if 'PWM_Limit' in settings:
                 self.setPWM_Limit(settings.get('PWM_Limit', 300))
             if 'PWM_inc_limit' in settings:
                 self.setAngle_PWM_limit(settings.get('PWM_inc_limit', 1))
+                
             if 'Mode' in settings:
                 self.mode = self.str2mode(settings.get('Mode', 'none'))
+                
             if 'TimeOut' in settings:
                 self.setTimeout(settings.get('TimeOut', 1))
+                
             if 'Angle_PID_P' in settings:
                 self.setAngle_PID_P(settings.get('Angle_PID_P', 1))
             if 'Angle_PID_I' in settings:
@@ -36,12 +47,7 @@ class X4Motor():
                 self.setSpeed_PID_P(settings.get('Speed_PID_P', 1))
             if 'Speed_PID_I' in settings:
                 self.setSpeed_PID_I(settings.get('Speed_PID_I', 1))
-            if 'I_limit' in settings:
-                self.setIlimit(settings.get('I_limit', 5000))
-            if 'V_min' in settings:
-                self.setVlimit(settings.get('V_min', 11))
-            if 'TempShutDown' in settings:
-                self.setTempShutDown(settings.get('TempShutDown', 90))
+            
         else:
             self.id = id
             self.mode = mode
