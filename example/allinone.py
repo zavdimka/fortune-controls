@@ -46,7 +46,7 @@ print("Speed Demo")
 points = [1,2,4,8,10,0,-10,-10]
 for i in points:
     print("Set Speed to",i)
-    M.speed = i/10
+    M.speed = i
     e = M.readError()
     if e>0:
         print("Error is", e)
