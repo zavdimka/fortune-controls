@@ -37,6 +37,7 @@ If it's all ok, at poweron green led starts blink for 2 seconts, then weakly glo
 **Known problems**
 
 no?
+[[Wiki |Wiki/Home]]
 
 **Load sensor config**
 
