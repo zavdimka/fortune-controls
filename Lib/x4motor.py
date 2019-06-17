@@ -53,6 +53,8 @@ class X4Motor(object):
             self.mode = mode
         
         self.angle = 0
+        self.anglezero = 0
+        self.anglezero = self.dstep
         print('id' + str(self.id))
         self.angle = self.readAngle()  #for sensor
         self.sangle = self.angle # for set up
@@ -72,6 +74,8 @@ class X4Motor(object):
         if str == 'PWM'.lower():
             return self.MODE_PWM
         return self.MODE_NONE
+        
+     
 
     @property
     def dstep(self):
@@ -93,7 +97,9 @@ class X4Motor(object):
         #print(f'was {self.sangle:.1f}, setting {d:.1f}, diff {a:.1f}')
         self.sangle = a
         self.setAngle(int(a))
-
+        
+    def stepzero(self):
+        self.anglezero += self.step
 
     @property
     def step(self):
@@ -102,11 +108,13 @@ class X4Motor(object):
         i = a / self.stepspermm
         if self.reverse:
             i = -i
+        i -= self.anglezero
         return i
 
 
     @step.setter
     def step(self, value):
+        value += self.anglezero
         if self.reverse:
             value = -value
         d = value * self.stepspermm
@@ -343,6 +351,11 @@ class X4Motor(object):
         
     def clear_error(self):
         self.client.write_register(29, 0, unit=self.id)
+        
+    
+    def reset(self):
+        self.client.write_register(1023, 1023, unit=self.id)
+        
 
         
     def loadsensorconfig(self, filename):
