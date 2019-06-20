@@ -8,9 +8,9 @@ from x4motor import X4Motor
 import time
 import hjson
 
-client= ModbusClient(method = "rtu", port="/dev/ttyS1", stopbits = 1,
+client= ModbusClient(method = "rtu", port="COM4", stopbits = 1,
                      bytesize = 8, parity = 'N', baudrate= 115200,
-                     timeout = 0.8 )
+                     timeout = 0.8, strict=False )
 
 client.connect()
 

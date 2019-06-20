@@ -367,3 +367,13 @@ class X4Motor(object):
         p= builder.build()
         for i,j in zip(p,range(len(d))):
             self.client.write_register(30+j, i, skip_encode=True, unit=self.id)
+    
+    def savesensorconfig(self, filename):
+        result = self.client.read_holding_registers(30, 1, unit=self.id)
+        decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
+                                                     byteorder=Endian.Big,
+                                                     wordorder=Endian.Little)
+        l = [decoder.decode_16bit_int() for i in range(12)]
+        s = np.array(l)
+        np.save(filename)
+        

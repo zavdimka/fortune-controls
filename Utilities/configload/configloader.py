@@ -37,6 +37,12 @@ if args.action == 'w':
         log.info("load ok")
         M.save2flash()
         log.info('save to flash ok')
+        
+if args.action == 'r':
+        M = X4Motor(client, args.addr)
+        M.savesensorconfig(args.file)
+        log.info('read ok')
+
     
 
 client.close()
