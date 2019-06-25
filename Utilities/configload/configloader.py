@@ -12,8 +12,8 @@ log = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("action",choices=['r', 'w', 'e'], type=str.lower, help = "port to connect")
 parser.add_argument("port", type=str, default='COM1', help = "port to connect")
+parser.add_argument("action",choices=['r', 'w', 'e'], type=str.lower, help = "port to connect")
 parser.add_argument("file", type=str, default='test.npy', help = "file to deal with")
 parser.add_argument("-s", "--baund", type=int, default=115200, help = "port speed")
 parser.add_argument("-a", "--addr", type=int, default=1, help = "modbus addres")
@@ -32,14 +32,14 @@ log.info(f"connected ok")
 
 
 if args.action == 'w':
-        M = X4Motor(client, args.addr)
+        M = X4Motor(client, {'id':args.addr})
         M.loadsensorconfig(args.file)
         log.info("load ok")
         M.save2flash()
         log.info('save to flash ok')
         
 if args.action == 'r':
-        M = X4Motor(client, args.addr)
+        M = X4Motor(client, {'id':args.addr})
         M.savesensorconfig(args.file)
         log.info('read ok')
 

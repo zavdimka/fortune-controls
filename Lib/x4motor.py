@@ -14,6 +14,8 @@ class X4Motor(object):
         self._mode = self.MODE_NONE
         self.client = client
         self.stepspermm = 1
+        self.reverse = 0
+        
         if settings:
             self.id = settings.get('id',1)
             if 'I_limit' in settings:
@@ -369,11 +371,11 @@ class X4Motor(object):
             self.client.write_register(30+j, i, skip_encode=True, unit=self.id)
     
     def savesensorconfig(self, filename):
-        result = self.client.read_holding_registers(30, 1, unit=self.id)
+        result = self.client.read_holding_registers(30, 12, unit=self.id)
         decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
         l = [decoder.decode_16bit_int() for i in range(12)]
         s = np.array(l)
-        np.save(filename)
+        np.save(filename, s)
         
