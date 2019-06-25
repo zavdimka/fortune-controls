@@ -259,6 +259,24 @@ class X4Motor(object):
                                                      byteorder=Endian.Big,
                                                      wordorder=Endian.Little)
         return decoder.decode_16bit_int()
+        
+    def readAllRO(self):
+        result = self.client.read_holding_registers(64, 11, unit=self.id)
+        decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
+                                                     byteorder=Endian.Big,
+                                                     wordorder=Endian.Little)
+        ans = {}
+        ans['V'] = decoder.decode_16bit_int()
+        ans['I'] = decoder.decode_16bit_int()
+        ans['Temp'] = decoder.decode_16bit_int()
+        ans['Angle'] = decoder.decode_32bit_int()
+        ans['Speed'] = decoder.decode_16bit_int()
+        ans['Vect Angle'] = decoder.decode_16bit_int()
+        ans['Vect pwm'] = decoder.decode_16bit_int()
+        ans['A'] = decoder.decode_16bit_int()
+        ans['B'] = decoder.decode_16bit_int()
+        ans['C'] = decoder.decode_16bit_int()
+        return ans
 
     def updateMode(self):
         self.client.write_register(0, self.mode, unit=self.id)
