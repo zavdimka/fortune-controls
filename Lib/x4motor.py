@@ -15,6 +15,7 @@ class X4Motor(object):
         self.client = client
         self.stepspermm = 1
         self.reverse = 0
+        self.anglezero = 0
         
         if settings:
             self.id = settings.get('id',1)
@@ -55,7 +56,6 @@ class X4Motor(object):
             self.mode = mode
         
         self.angle = 0
-        self.anglezero = 0
         self.anglezero = self.dstep
         print('id' + str(self.id))
         self.angle = self.readAngle()  #for sensor
