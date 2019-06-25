@@ -1,5 +1,6 @@
 import sys
 sys.path.append('..\..\Lib')
+sys.path.append('../../Lib')
 
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient #initialize a serial RTU client instance
 from x4motor import X4Motor
