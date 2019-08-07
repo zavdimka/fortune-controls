@@ -139,7 +139,7 @@ class X4Motor(object):
     @property
     def speed(self):
         s = self.readSpeed()
-        i = a / self.stepspermm
+        i = s / self.stepspermm
         if self.reverse:
             i = -i
         return i
