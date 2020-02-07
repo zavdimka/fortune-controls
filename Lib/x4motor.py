@@ -8,6 +8,7 @@ class X4Motor(object):
     MODE_ANGLE = 1
     MODE_SPEED = 2
     MODE_PWM = 3
+    MODE_MANUAL = 4
     MODE_NONE = 0
 
     def __init__(self, client, settings = None, id = 1, mode = MODE_NONE):
@@ -19,6 +20,7 @@ class X4Motor(object):
         
         if settings:
             self.id = settings.get('id',1)
+            #print("self id %i"%(self.id))
             if 'I_limit' in settings:
                 self.setIlimit(settings.get('I_limit', 5000))
             if 'V_min' in settings:
@@ -75,6 +77,8 @@ class X4Motor(object):
             return self.MODE_SPEED
         if str == 'PWM'.lower():
             return self.MODE_PWM
+        if str == 'Manual'.lower():
+            return self.MODE_MANUAL
         return self.MODE_NONE
         
      
@@ -303,6 +307,16 @@ class X4Motor(object):
         
     def save2flash(self):
         self.client.write_register(130, 0, unit=self.id)
+        
+    def setmanual(self, pwm, angle):
+        if self.mode != self.MODE_MANUAL:
+            self.mode = self.MODE_MANUAL
+        builder = BinaryPayloadBuilder(byteorder=Endian.Big,
+                                       wordorder=Endian.Little)
+        builder.add_16bit_int(int(angle))
+        builder.add_16bit_int(int(pwm))
+        payload = builder.build()
+        self.client.write_registers(1, payload, skip_encode=True, unit=self.id)
 
         
     def setAngle_PID_P(self,i):

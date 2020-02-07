@@ -77,7 +77,7 @@ elif args.action == 'i':
     l.write_id_speed(args.newid, 10)
     logging.info(f"set in {time.time()-t:.2f}")
     l.run_app()
- else:
+else:
     logging.error("No action selected")
     
 client.close()
