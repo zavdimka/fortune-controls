@@ -9,6 +9,7 @@ class X4Motor(object):
     MODE_SPEED = 2
     MODE_PWM = 3
     MODE_MANUAL = 4
+    MODE_MANUAL_ROT = 5
     MODE_NONE = 0
 
     def __init__(self, client, settings = None, id = 1, mode = MODE_NONE):
@@ -59,7 +60,7 @@ class X4Motor(object):
         
         self.angle = 0
         self.anglezero = self.dstep
-        print('id' + str(self.id))
+        logging.info('id' + str(self.id))
         self.angle = self.readAngle()  #for sensor
         self.sangle = self.angle # for set up
         self.speed = 0
@@ -67,6 +68,7 @@ class X4Motor(object):
         self.targetAngle = 0
         #self.setPWM_Limit(500)  # 200 ~2.7A,  400 ~12A,  450 ~16A
         self.clear_error()
+        logging.info(f'Init id {self.id} done')
 
 
     def str2mode(self, str):
@@ -283,8 +285,8 @@ class X4Motor(object):
         return ans
 
     def updateMode(self):
+        logging.info(f"Set mode to {self.mode}")
         self.client.write_register(0, self.mode, unit=self.id)
-        
 
     def setID(self, index):
         self.client.write_register(129, index, unit=self.id)
@@ -317,6 +319,16 @@ class X4Motor(object):
         builder.add_16bit_int(int(pwm))
         payload = builder.build()
         self.client.write_registers(1, payload, skip_encode=True, unit=self.id)
+        
+    def setmanualrot(self, pwm, speed):
+        if self.mode != self.MODE_MANUAL_ROT:
+            self.mode = self.MODE_MANUAL_ROT
+        builder = BinaryPayloadBuilder(byteorder=Endian.Big,
+                                       wordorder=Endian.Little)
+        builder.add_16bit_int(int(pwm))
+        builder.add_16bit_int(int(speed))
+        payload = builder.build()
+        self.client.write_registers(2, payload, skip_encode=True, unit=self.id)
 
         
     def setAngle_PID_P(self,i):
@@ -389,7 +401,22 @@ class X4Motor(object):
     
     def reset(self):
         self.client.write_register(1023, 1023, unit=self.id)
-        
+
+
+    def write_config(self, config):
+        builder = BinaryPayloadBuilder(byteorder=Endian.Big,
+                                       wordorder=Endian.Little)
+        [builder.add_16bit_int(i) for i in config]
+        payload = builder.to_registers()
+        self.client.write_registers(30, payload, unit=self.id)
+
+    def read_config(self):
+        result = self.client.read_holding_registers(30, 12, unit=self.id)
+        decoder = BinaryPayloadDecoder.fromRegisters(result.registers,
+                                                     byteorder=Endian.Big,
+                                                     wordorder=Endian.Little)
+        l = [decoder.decode_16bit_int() for i in range(12)]
+        return l
 
         
     def loadsensorconfig(self, filename):

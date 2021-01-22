@@ -8,7 +8,7 @@ from x4motor import X4Motor
 import time
 import hjson
 
-client= ModbusClient(method = "rtu", port="COM3", stopbits = 1,
+client= ModbusClient(method = "rtu", port="COM20", stopbits = 1,
                      bytesize = 8, parity = 'N', baudrate= 115200,
                      timeout = 0.8, strict=False )
 
@@ -21,7 +21,7 @@ f.close()
 M = X4Motor(client, settings = config)
 
 print(M.readAllRO())
-
+'''
 print("Angle read Demo")
 for i in range(100):
     angle = M.step
@@ -40,7 +40,7 @@ for i in points:
     
 M.release()
 time.sleep(0.5)
-
+'''
 print("Speed Demo")
 points = [1,2,4,8,10,0,-10,-10]
 for i in points:
