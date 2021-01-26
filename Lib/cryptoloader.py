@@ -105,7 +105,7 @@ class CrytoLoader():
             return False
 
     def set_new_id(self, id):
-        self.client.write_register(self.MB_MBID_REG, 0, unit=self.id)
+        self.client.write_register(self.MB_MBID_REG, id, unit=self.id)
 
 
     def upload_bin(self, buff):
