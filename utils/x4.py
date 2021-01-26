@@ -68,6 +68,9 @@ def scan_dev(args):
 
 def settings_fw(args):
     logging.info(f"Set new id {args.id_new} for {args.id} device")
+    if args.id_new == args.id:
+        logging.error(f"Id are the same")
+        return
     client = make_connection(args)
     l = CrytoLoader(client, args.id)
     l.set_new_id(args.id_new)
@@ -186,7 +189,7 @@ if __name__ == "__main__":
     settings_group.add_argument("port", type=str, default="COM1", help = "port to connect with controller")
     settings_group.add_argument("-b", type=int, default=115200, dest='baud', help = "serial port baudrate")
     settings_group.add_argument("-n",type=int, default=1, dest="id", help="ModBus id number")
-    settings_group.add_argument("-m",type=int, default=1, dest="new_id", help="ModBus new id number")
+    settings_group.add_argument("-m",type=int, default=1, dest="id_new", help="ModBus new id number")
     settings_group.add_argument("-r",action='count', dest="fr", help="Run main app after all")
     settings_group.set_defaults(func = settings_fw)
 
