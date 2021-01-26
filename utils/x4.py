@@ -91,8 +91,8 @@ def calibrate_fw(args):
     logging.info(f"Turns is {args.turns}")
 
     time.sleep(0.5)
-    ss = {'I_limit' : 5, 'V_min' : 12, 'TimeOut': 500, 'TempShutDown' : 100}
-    m = X4Motor(client, settings= ss, id = args.id)
+    ss = {'I_limit' : 5, 'V_min' : 12, 'TimeOut': 500, 'TempShutDown' : 100, 'id' : args.id}
+    m = X4Motor(client, settings= ss)
 
     data = [[], [], []]
 
